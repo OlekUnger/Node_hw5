@@ -3,7 +3,7 @@ const passport = require('passport')
 const uuidv4 = require('uuid/v4')
 const User = require('../models/Users')
 
-module.exports.saveNewUser = async function (req, res, next) {
+module.exports.saveNewUser = async (req, res, next) => {
     const candidate = await User.findOne({username: req.body.username})
 
     if (candidate) {
@@ -25,8 +25,8 @@ module.exports.saveNewUser = async function (req, res, next) {
         })
         try {
             await user.save();
-            req.logIn(user, err=>{
-                if(err) next(err)
+            req.logIn(user, err => {
+                if (err) next(err)
                 res.status(200).json(user)
             })
 
@@ -37,12 +37,12 @@ module.exports.saveNewUser = async function (req, res, next) {
 }
 
 module.exports.login = function (req, res, next) {
-    passport.authenticate('local', async function(err, user){
+    passport.authenticate('local', async function (err, user) {
         try {
-            if(!user){
+            if (!user) {
                 res.json({error: 'Пользователь не найден'})
             } else {
-                if(req.body.remembered) {
+                if (req.body.remembered) {
                     const token = uuidv4()
                     user.setToken(token)
                     await user.save()
@@ -53,22 +53,22 @@ module.exports.login = function (req, res, next) {
                     })
                 }
 
-                req.logIn(user, (err)=>{
-                    if(err){
+                req.logIn(user, (err) => {
+                    if (err) {
                         next(err)
                     }
                     res.json(user)
 
                 })
             }
-        } catch (err){
+        } catch (err) {
             next(err)
         }
     })(req, res, next)
 
 }
 
-module.exports.authFromToken = async function(req, res, next){
+module.exports.authFromToken = (req, res, next) => {
     console.log('asd')
     // const token = req.cookies('token')
 

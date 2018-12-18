@@ -1,16 +1,29 @@
 const path = require('path')
+const moment= require('moment')
+const fs = require('fs')
 
-module.exports = (req, res, next)=>{
+module.exports = async (req, res, next)=>{
     if (Object.keys(req.files).length == 0) {
         res.status(400).json('No files were uploaded.');
     }
     let file = req.files[req.params.id];
-    let uploadDir = path.join(process.cwd(), './public/upload', file.name);
+    let uploadDir = './public/assets/img';
 
-    file.mv(uploadDir, function(err) {
+    if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir);
+    }
+
+    let extName = path.extname(file.name)
+    let fileName = `${req.params.id}-${moment().format('DDMMYYY-HHMMss_SSS')}${extName}`
+
+    let dest = path.join(process.cwd(), uploadDir, fileName);
+
+    file.mv(dest, async function(err) {
         if (err){
-            next(err)
+            next(null, false);
+
         } else {
+            req.app.locals.fileName = fileName;
             next()
         }
     });
