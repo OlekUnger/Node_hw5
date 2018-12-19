@@ -68,32 +68,28 @@ module.exports.login = function (req, res, next) {
 
 }
 
-module.exports.authFromToken = (req, res, next) => {
-    console.log('asd')
-    // const token = req.cookies('token')
+module.exports.authFromToken = async (req, res, next) => {
 
-    // const token = req.cookies.token;
-    // console.log(token)
-    // if(token) {
-    //     try {
-    //         const user = await User.findOne({access_token: token})
-    //         console.log(user)
-    //         if(user){
-    //             console.log(user)
-    //             req.logIn(user, (err)=>{
-    //                 if(err){
-    //                     next(err)
-    //                 }
-    //                 res.status(200).json(user)
-    //             })
-    //         }
-    //         next();
-    //     } catch(err){
-    //         next(err)
-    //     }
-    // } else {
-    //     next()
-    // }
+    const token = req.cookies.token;
+    if(token) {
+        try {
+            const user = await User.findOne({access_token: token})
+            console.log(user)
+            if(user){
+                req.logIn(user, (err)=>{
+                    if(err){
+                        next(err)
+                    }
+                    res.status(200).json(user)
+                })
+            }
+            next();
+        } catch(err){
+            next(err)
+        }
+    } else {
+        next()
+    }
 }
 
 
