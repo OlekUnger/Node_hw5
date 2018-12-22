@@ -9,9 +9,12 @@ module.exports.saveNewUser = async (req, res, next) => {
     if (candidate) {
         res.status(409).json({error: 'Имя занято'})
     } else {
+
+        const salt = bcrypt.genSaltSync(10)
+        const password = req.body.password
         const user = new User({
             username: req.body.username,
-            password: candidate.setPassword(req.body.password),
+            password: bcrypt.hashSync(password, salt),
             surName: req.body.surName,
             firstName: req.body.firstName,
             middleName: req.body.middleName,
@@ -60,8 +63,6 @@ module.exports.login = function (req, res, next) {
 
                     })
                 }
-
-
 
             }
         } catch (err) {
