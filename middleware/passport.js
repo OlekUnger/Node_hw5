@@ -22,7 +22,7 @@ module.exports = passport => {
                 if(user) {
                     done(null, user)
                 } else {
-                    done('Польователь не найден', false)
+                    done(null, false)
                 }
             } catch (err) {
                 console.log('Ошибка');

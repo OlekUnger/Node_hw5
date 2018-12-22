@@ -9,12 +9,9 @@ module.exports.saveNewUser = async (req, res, next) => {
     if (candidate) {
         res.status(409).json({error: 'Имя занято'})
     } else {
-
-        const salt = bcrypt.genSaltSync(10)
-        const password = req.body.password
         const user = new User({
             username: req.body.username,
-            password: bcrypt.hashSync(password, salt),
+            password: candidate.setPassword(req.body.password),
             surName: req.body.surName,
             firstName: req.body.firstName,
             middleName: req.body.middleName,
@@ -42,24 +39,30 @@ module.exports.login = function (req, res, next) {
             if (!user) {
                 res.json({error: 'Пользователь не найден'})
             } else {
-                if (req.body.remembered) {
-                    const token = uuidv4()
-                    user.setToken(token)
-                    await user.save()
-                    res.cookie('token', token, {
-                        path: '/',
-                        httpOnly: true,
-                        maxAge: 7 * 60 * 60 * 1000
+                if (!user.validPassword(req.body.password, user.password)) {
+                    res.json({error: 'Неверный пароль'})
+                } else {
+                    if (req.body.remembered) {
+                        const token = uuidv4()
+                        user.setToken(token)
+                        await user.save()
+                        res.cookie('token', token, {
+                            path: '/',
+                            httpOnly: true,
+                            maxAge: 7 * 60 * 60 * 1000
+                        })
+                    }
+                    req.logIn(user, (err) => {
+                        if (err) {
+                            next(err)
+                        }
+                        res.json(user)
+
                     })
                 }
 
-                req.logIn(user, (err) => {
-                    if (err) {
-                        next(err)
-                    }
-                    res.json(user)
 
-                })
+
             }
         } catch (err) {
             next(err)
